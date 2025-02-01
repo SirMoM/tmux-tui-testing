@@ -1,0 +1,13 @@
+#Minimal Test
+% sh
+> "echo 'Hallo Welt'" enter 0
+> "ls -lAh" enter 10
+
+echo 'Hallo Welt'sh-3.2$ echo 'Hallo Welt'
+Hallo Welt
+sh-3.2$ ls -lAh
+total 16
+-rw-r--r--@ 1 i13az81  staff   1.7K Feb  1 14:23 e2e_test.go
+-rw-r--r--@ 1 i13az81  staff   664B Feb  1 14:31 play_test.go
+drwxr-xr-x@ 4 i13az81  staff   128B Feb  1 14:42 testfiles
+sh-3.2$

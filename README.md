@@ -9,3 +9,4 @@
 ```
 
 - Recorde cli output based on the spec file
+- add compare modes like strict ignore whitespace usw.

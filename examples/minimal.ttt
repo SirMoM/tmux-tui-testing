@@ -1,0 +1,9 @@
+#Minimal Test
+% PS1="" sh
+> "echo 'Hallo Welt'" enter 0
+> "ls" enter 10
+
+echo 'Hallo Welt'
+Hallo Welt
+ls
+example_test.go  minimal.ttt  testfiles

@@ -1,5 +1,5 @@
 #Sleep with bash
-% PS1="$ " bash --norc
+% PS1="$ " BASH_SILENCE_DEPRECATION_WARNING=1 bash --norc
 > "" none 25
 > "sleep 1" enter 1250
 > "echo $#" enter 50

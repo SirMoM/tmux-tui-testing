@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 var tmuxWasRunning = true
@@ -75,6 +76,8 @@ func CreateSession(programToStart string, t *testing.T) {
 		t.Log(string(out))
 		t.Fatalf("Failed to create tmux session: %v", err)
 	}
+	// TODO: Add a timeout to wait for the session to be created or check with Tmux to see if the session is ready
+	time.Sleep(500 * time.Millisecond)
 }
 
 // CreateShSession creates a new tmux session with the sh shell

@@ -13,8 +13,10 @@
 - add a way to have wildcards in the expected output for dates and so on
 
 
-use xit-empty [on | off]
+use exit-empty [on | off]
 If enabled (the default), the server will exit when there
 are no active sessions.
 
 for session / server management 
+
+For Dir executions add an cleanup option to restet the states between tests

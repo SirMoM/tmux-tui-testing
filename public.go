@@ -101,36 +101,43 @@ func DestroyDefaultSession(t *testing.T) {
 // RunTestSpec reads a test specification from the provided file path, then executes the test by creating a tmux session,
 // sending inputs, capturing the output, and comparing it with the expected output. If any error occurs during the process,
 // it reports the failure and halts the test.
-func RunTestSpec(filePath string, t *testing.T) {
+//
+// The cleanupFunc is called after each test in the directory. If no cleanup function is wanted, pass nil.
+func RunTestSpec(filePath string, cleanupFunc *func(), t *testing.T) {
 	testSpec, err := internal.ReadTestSpec(filePath)
 	if err != nil {
 		t.Errorf("Failed to read test spec: %v", err)
 		t.FailNow()
 	}
-	t.Run(testSpec.Name, func(t *testing.T) {
+	t.Run(testSpec.Name, func(ot *testing.T) {
+		if cleanupFunc != nil {
+			ot.Cleanup(*cleanupFunc)
+		}
 
-		CreateSession(testSpec.RootProgramm, t)
+		CreateSession(testSpec.RootProgramm, ot)
 
 		// Send inputs
-		internal.SendInputs(testSpec.Inputs, t)
+		internal.SendInputs(testSpec.Inputs, ot)
 
 		// Capture and save output
-		actualOutput := internal.CaptureOutput(t)
-		internal.CompareOutput(actualOutput, testSpec.ExpectedOutput, t)
+		actualOutput := internal.CaptureOutput(ot)
+		internal.CompareOutput(actualOutput, testSpec.ExpectedOutput, ot)
 
-		DestroyDefaultSession(t)
+		DestroyDefaultSession(ot)
 	})
 }
 
 // RunTestSpecDir reads and executes test specifications from all files in the specified directory.
 // It iterates over the directory entries and calls RunTestSpec for each file. If an error occurs while reading the directory, it reports the failure.
 //
+// The cleanupFunc is called after each test in the directory. If no cleanup function is wanted, pass nil.
+//
 // **This doesn't read the subdirectories recursively!**
-func RunTestSpecDir(dirPath string, t *testing.T) {
+func RunTestSpecDir(dirPath string, cleanupFunc *func(), t *testing.T) {
 	if dirEntries, err := os.ReadDir(dirPath); err == nil {
 		for _, entry := range dirEntries {
 			filePath := filepath.Join(dirPath, entry.Name())
-			RunTestSpec(filePath, t)
+			RunTestSpec(filePath, cleanupFunc, t)
 		}
 	} else {
 		t.Fatal(err)

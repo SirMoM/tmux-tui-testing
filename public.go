@@ -136,6 +136,9 @@ func RunTestSpec(filePath string, cleanupFunc *func(), t *testing.T) {
 func RunTestSpecDir(dirPath string, cleanupFunc *func(), t *testing.T) {
 	if dirEntries, err := os.ReadDir(dirPath); err == nil {
 		for _, entry := range dirEntries {
+			if entry.IsDir() {
+				continue
+			}
 			filePath := filepath.Join(dirPath, entry.Name())
 			RunTestSpec(filePath, cleanupFunc, t)
 		}

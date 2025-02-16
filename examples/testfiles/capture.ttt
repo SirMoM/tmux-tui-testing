@@ -1,0 +1,24 @@
+# Capture output in the middle of the execution
+% PS1="$ " sh
+> "gum choose Hallo Was geht ab" enter 500
+[snapshot]
+> "" enter 250
+> "echo Welt" enter 50
+
+$ gum choose Hallo Was geht ab
+Choose:
+> Hallo
+  Was
+  geht
+  ab
+
+←↓↑→ navigate • enter submit
+$ gum choose Hallo Was geht ab
+Hallo
+$ echo Welt
+Welt
+$
+
+
+
+

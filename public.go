@@ -117,10 +117,11 @@ func RunTestSpec(filePath string, cleanupFunc *func(), t *testing.T) {
 		CreateSession(testSpec.RootProgramm, ot)
 
 		// Send inputs
-		internal.SendInputs(testSpec.Inputs, ot)
+		snapshots := internal.SendInputs(testSpec.Inputs, ot)
 
 		// Capture and save output
-		actualOutput := internal.CaptureOutput(ot)
+		actualOutput := strings.TrimSpace(internal.CaptureOutput(ot))
+		actualOutput = strings.Join(snapshots, "\n") + "\n" + actualOutput
 		internal.CompareOutput(actualOutput, testSpec.ExpectedOutput, ot)
 
 		DestroyDefaultSession(ot)

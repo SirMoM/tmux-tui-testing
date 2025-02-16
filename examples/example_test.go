@@ -6,9 +6,13 @@ import (
 )
 
 func TestRunSpecFile(t *testing.T) {
-	ttt.RunTestSpec("minimal.ttt", t)
+	ttt.RunTestSpec("minimal.ttt", nil, t)
 }
 
 func TestRunDir(t *testing.T) {
-	ttt.RunTestSpecDir("testfiles", t)
+	ttt.RunTestSpecDir("testfiles", nil, t)
+}
+
+func TestRunDev(t *testing.T) {
+	ttt.RunTestSpec("testfiles/capture.ttt", nil, t)
 }

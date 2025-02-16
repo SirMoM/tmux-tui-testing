@@ -17,6 +17,22 @@ const (
 	none
 )
 
+type metaCommand int
+
+func (m *metaCommand) String() string {
+	switch *m {
+	case snapshot:
+		return "Snapshot"
+	default:
+		return "NOT IMPLEMENTED"
+	}
+}
+
+const (
+	None metaCommand = iota
+	snapshot
+)
+
 // String returns the string representation of the confirmKey.
 func (c *confirmKey) String() string {
 	switch *c {
@@ -33,6 +49,7 @@ func (c *confirmKey) String() string {
 // tmuxInput represents a single input that can be passed to tmux.
 type tmuxInput struct {
 	text            string
+	metaCommand     metaCommand
 	confirmationKey confirmKey
 	sleepMs         time.Duration
 }
@@ -57,7 +74,13 @@ func (t tmuxInputs) String() string {
 
 // String the string representation
 func (t tmuxInput) String() string {
-	return fmt.Sprintf("'%s' %s %v", t.text, t.confirmationKey.String(), t.sleepMs)
+	var inputText string
+	if t.metaCommand != None && t.text != "" {
+		inputText = t.metaCommand.String()
+	} else {
+		inputText = t.text
+	}
+	return fmt.Sprintf("'%s' %s %v", inputText, t.confirmationKey.String(), t.sleepMs)
 }
 
 const (
@@ -93,12 +116,23 @@ func vLogP(str string) {
 // It logs each input, sends text or confirmation keys (Enter, Tab, None), and waits for a specified sleep duration between inputs.
 // If the terminal does not finish processing within five minutes, a timeout error is raised.
 // TODO: do i want t expose this?
-func SendInputs(inputs []tmuxInput, t *testing.T) {
+func SendInputs(inputs []tmuxInput, t *testing.T) []string {
+	results := make([]string, 0)
 	vLog("Sending Inputs:")
 	for idx, input := range inputs {
 		vLogP(fmt.Sprintf("%d: %v", idx, input))
 
-		if input.text != "" {
+		if input.metaCommand != None {
+			switch input.metaCommand {
+			case snapshot:
+				// Take snapshot
+				vLogP("Taking snapshot")
+				results = append(results, strings.TrimSpace(CaptureOutput(t)))
+				continue
+			default:
+				t.Fatalf("Invalid meta command: %v", input.metaCommand)
+			}
+		} else if input.text != "" {
 			sendCharacters(t, input.text)
 		}
 
@@ -129,6 +163,7 @@ func SendInputs(inputs []tmuxInput, t *testing.T) {
 			t.Fatal("sendKeysWithDelay timed out")
 		}
 	}
+	return results
 }
 
 // sendEnter sends Enter as the escaped code to the tmux session.

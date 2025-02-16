@@ -66,23 +66,30 @@ func ReadTestSpec(filePath string) (*TestSpec, error) {
 		}
 
 		switch {
-		case strings.HasPrefix(line, "#"):
+		case strings.HasPrefix(line, "#") && currentSection != sectionExpectedOutput:
 			err = parseNameSection(&currentSection, spec, line, lineNr)
 			if err != nil {
 				return nil, err
 			}
 
-		case strings.HasPrefix(line, "%"):
+		case strings.HasPrefix(line, "%") && currentSection != sectionExpectedOutput:
 			err = parseRootProgramSection(&currentSection, spec, line, lineNr)
 			if err != nil {
 				return nil, err
 			}
 
-		case strings.HasPrefix(line, ">"):
+		case strings.HasPrefix(line, ">") && currentSection != sectionExpectedOutput:
 			err = parseInputsSection(&currentSection, spec, line, lineNr)
 			if err != nil {
 				return nil, err
 			}
+		case strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") && currentSection != sectionExpectedOutput:
+			if currentSection != sectionInputs {
+				return nil, fmt.Errorf("Meta commands are only allowed in the input section. Failed parsing in line:" + strconv.Itoa(lineNr))
+			}
+			// Parse meta commands
+			rawMetaCommand := strings.Trim(line, "[]")
+			parseMetaCommand(rawMetaCommand, spec, lineNr)
 
 		default:
 			if currentSection == sectionExpectedOutput {
@@ -98,6 +105,20 @@ func ReadTestSpec(filePath string) (*TestSpec, error) {
 	vLogP("Done reading TestSpec")
 	vLogP(fmt.Sprintf("%+#v", spec))
 	return spec, nil
+}
+
+func parseMetaCommand(metaCommand string, spec *TestSpec, lineNr int) {
+	switch metaCommand {
+	case "snapshot":
+		spec.Inputs = append(spec.Inputs, tmuxInput{
+			text:            "",
+			metaCommand:     snapshot,
+			confirmationKey: none,
+			sleepMs:         0,
+		})
+	default:
+		vLogP(fmt.Sprintf("Unknown meta command: %s in line %d", metaCommand, lineNr))
+	}
 }
 
 // parseInputsSection parses the input section of the specification and updates the TestSpec.
@@ -118,7 +139,7 @@ func parseInputsSection(currentSection *specSection, spec *TestSpec, line string
 	})
 
 	if len(parts) < 3 {
-		return fmt.Errorf(`invalid input format, expected: > "text" key sleepInMs`)
+		return fmt.Errorf(`invalid input format, expected: > "text" key sleepInMs got %s parts in line %d `, line, lineNr)
 	}
 
 	unquotedText := strings.Trim(parts[0], "\"")
